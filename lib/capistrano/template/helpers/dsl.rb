@@ -3,6 +3,17 @@ module Capistrano
     module Helpers
       module DSL
         # rubocop: disable Metrics/AbcSize
+        def template_p(params = {})
+          from   = params[:from]
+          to     = params[:to]
+          mode   = params[:mode]
+          user   = params[:user]
+          group  = params[:group]
+          locals = params[:locals] || {}
+
+          return template(from, to, mode, user, group, locals: locals)
+        end
+
         def template(from, to = nil, mode = 0640, user = nil, group = nil, locals: {})
           fail ::ArgumentError, "template #{from} not found Paths: #{template_paths_lookup.paths_for_file(from).join(':')}" unless template_exists?(from)
 

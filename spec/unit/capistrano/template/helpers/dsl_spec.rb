@@ -32,6 +32,10 @@ module Capistrano
               data.fetch(*args)
             end
 
+            def dry_run?
+              true
+            end
+
             def _paths_factory
               lambda do |*args|
                 PathsLookup.new(*args).tap do |pl|
@@ -51,12 +55,35 @@ module Capistrano
         end
 
         let(:template_name) { 'my_template.erb' }
+        #let(:upload_handler) { 'hi }
 
         describe '#template' do
           it 'raises an exception when template does not exists' do
             subject.file_exists = false
             expect { subject.template(template_name) }.to raise_error(ArgumentError, /template #{template_name} not found Paths/)
           end
+        end
+
+        describe '#template_p' do
+          it 'makes underlying call to template' do
+            p = {
+              :from => template_name,
+              :to   => 'to',
+              :mode => '0744',
+              :user => 'bob',
+              :grp  => 'users',
+              :locals => {
+                :testkey => 'testval'
+              }
+            }
+            expect(subject).to receive(:template).with(p[:from], p[:to], p[:mode], p[:user], p[:group], locals: p[:locals])
+            subject.template_p(p)
+          end
+
+          it 'has default values' do
+            expect(subject).to receive(:template).with(template_name, nil, nil, nil, nil, locals: {})
+            subject.template_p(:from => template_name)
+          end 
         end
       end
     end
